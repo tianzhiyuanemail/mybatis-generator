@@ -1,0 +1,33 @@
+package ${package}.dao.${moduleName};
+
+import ${package}.entity.${moduleName}.${className}Entity;
+
+import java.util.List;
+import java.util.Map;
+/**
+ * ${comments}
+ * 
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+public interface ${className}Dao  {
+
+    ${className}Entity queryObject(${pk.attrType} ${pk.attrname});
+
+    List<${className}Entity> queryList(Map<String, Object> map);
+
+    int queryTotal(Map<String, Object> map);
+
+    int save(${className}Entity ${classname});
+
+    int saveBatch(List<${className}Entity> list);
+
+    int update(${className}Entity ${classname});
+
+    int updateBatch(List<${className}Entity> list);
+
+    int delete(${pk.attrType} ${pk.attrname});
+
+    int deleteBatch(${pk.attrType}[] ${pk.attrname}s);
+}

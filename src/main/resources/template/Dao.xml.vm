@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="${package}.dao.${moduleName}.${className}Dao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="${package}.entity.${moduleName}.${className}Entity" id="${classname}Map">
+		#foreach($column in $columns)
+            <result property="${column.attrname}" column="${column.columnName}"/>
+		#end
+    </resultMap>
+    <sql id="${classname}BaseSql" >
+		#foreach($column in $columns)${column.columnName}#if($foreach.hasNext),#end#end
+
+	</sql>
+    <sql id="baseSearch">
+        <where>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+        </where>
+    </sql>
+    <select id="queryObject" resultType="${package}.entity.${moduleName}.${className}Entity">
+		select * from ${tableName} where ${pk.columnName} = #{id}
+	</select>
+
+    <select id="queryList" resultType="${package}.entity.${moduleName}.${className}Entity">
+        select * from ${tableName}
+        <include refid="baseSearch"></include>
+        <if test="pageStart!=null and pageSize!=null">
+            order by id desc
+            limit #{pageStart},#{pageSize}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="java.lang.Integer">
+        select count(1) from ${tableName}
+        <include refid="baseSearch"></include>
+    </select>
+
+    <insert id="save" parameterType="${package}.entity.${moduleName}.${className}Entity"#if($pk.extra == 'auto_increment') useGeneratedKeys="true" keyProperty="$pk.attrname"#end>
+		insert into ${tableName}
+		(
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+			`$column.columnName`#if($velocityCount != $columns.size()), #end
+
+#end
+#end
+		)
+		values
+		(
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+			#{$column.attrname}#if($velocityCount != $columns.size()), #end
+
+#end
+#end
+		)
+	</insert>
+
+    <insert id="saveBatch" >
+        insert into ${tableName}
+        (
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+			`$column.columnName`#if($velocityCount != $columns.size()), #end
+
+#end
+#end
+        )
+        values
+        <foreach collection="list" item="obj" separator=",">
+            (
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName || $pk.extra != 'auto_increment')
+			#{obj.$column.attrname}#if($velocityCount != $columns.size()), #end
+
+#end
+#end
+            )
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="${package}.entity.${moduleName}.${className}Entity">
+        update ${tableName}
+        <set>
+#foreach($column in $columns)
+#if($column.columnName != $pk.columnName)
+             <if test="$column.attrname != null">`$column.columnName` = #{$column.attrname}#if($velocityCount != $columns.size()), #end</if>
+#end
+#end
+        </set>
+        where ${pk.columnName} = #{${pk.attrname}}
+    </update>
+
+    <delete id="delete">
+		delete from ${tableName} where ${pk.columnName} = #{value}
+	</delete>
+
+    <delete id="deleteBatch">
+        delete from ${tableName} where ${pk.columnName} in
+        <foreach item="${pk.attrname}" collection="array" open="(" separator="," close=")">
+            #{${pk.attrname}}
+        </foreach>
+    </delete>
+
+</mapper>

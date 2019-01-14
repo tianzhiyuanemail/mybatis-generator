@@ -1,0 +1,107 @@
+package ${package}.service.${moduleName}.impl;
+
+import com.alibaba.fastjson.JSON;
+import com.haier.common.PagerInfo;
+import com.haier.common.ServiceResult;
+import ${package}.dao.${moduleName}.${className}Dao;
+import ${package}.entity.${moduleName}.${className}Entity;
+import ${package}.service.${moduleName}.${className}Service;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+
+@Service("${classname}Service")
+public class ${className}ServiceImpl implements ${className}Service {
+
+    private static Logger logger = Logger.getLogger(Object.class);
+
+	@Autowired
+	private ${className}Dao ${classname}Dao;
+
+    /**
+     * 查询
+     */
+    @Override
+    public ServiceResult<${className}Entity> queryObject(Integer id){
+
+        ServiceResult<${className}Entity> serviceResult = new ServiceResult<>();
+        try {
+			${className}Entity ${classname} = ${classname}Dao.queryObject(id);
+            serviceResult.setResult(${classname});
+        } catch (Exception e) {
+            logger.error("[${className}Service][queryObject]根据条件查询发生异常"
+                    + System.getProperty("line.separator", "\n") + "参数信息：" + JSON.toJSONString(id)
+                    + System.getProperty("line.separator", "\n") + "异常信息：", e);
+            serviceResult.setMessage("根据条件查询发生异常");
+            serviceResult.setSuccess(false);
+        }
+        return serviceResult;
+	}
+    /**
+	 * 查询分页
+	 */
+	@Override
+    public ServiceResult<List<${className}Entity>> queryList(PagerInfo pagerInfo,Map<String, Object> map){
+
+        ServiceResult<List<${className}Entity>> serviceResult = new ServiceResult<>();
+        try {
+            map.put("pageStart",pagerInfo.getStart());
+            map.put("pageSize",pagerInfo.getPageSize());
+            int i = ${classname}Dao.queryTotal(map);
+            pagerInfo.setRowsCount(i);
+            serviceResult.setResult(${classname}Dao.queryList(map));
+            serviceResult.setPager(pagerInfo);
+        } catch (Exception e) {
+            logger.error("[${className}Service][queryList]根据条件查询列表发生异常"
+                    + System.getProperty("line.separator", "\n") + "参数信息：" + JSON.toJSONString(map)
+                    + System.getProperty("line.separator", "\n") + "异常信息：", e);
+            serviceResult.setMessage("根据条件查询列表发生异常");
+            serviceResult.setSuccess(false);
+        }
+        return serviceResult;
+
+	}
+
+    /**
+	 * 添加
+	 */
+	@Override
+    public ServiceResult<Integer> save(${className}Entity ${classname}){
+        ServiceResult<Integer> serviceResult = new ServiceResult<>();
+        try {
+            Integer integer = ${classname}Dao.save(${classname});
+            serviceResult.setResult(integer);
+        } catch (Exception e) {
+            logger.error("[${className}Service][save]保存数据发生异常"
+                    + System.getProperty("line.separator", "\n") + "参数信息：" + JSON.toJSONString(${classname})
+                    + System.getProperty("line.separator", "\n") + "异常信息：", e);
+            serviceResult.setMessage("保存数据发生异常");
+            serviceResult.setSuccess(false);
+        }
+        return serviceResult;
+	}
+    /**
+	 * 修改
+	 */
+	@Override
+    public ServiceResult<Integer> update(${className}Entity ${classname}){
+        ServiceResult<Integer> serviceResult = new ServiceResult<>();
+        try {
+            Integer integer = ${classname}Dao.update(${classname});
+            serviceResult.setResult(integer);
+        } catch (Exception e) {
+            logger.error("[${className}Service][update]修改数据发生异常"
+                    + System.getProperty("line.separator", "\n") + "参数信息：" + JSON.toJSONString(${classname})
+                    + System.getProperty("line.separator", "\n") + "异常信息：", e);
+            serviceResult.setMessage("修改数据发生异常");
+            serviceResult.setSuccess(false);
+        }
+        return serviceResult;
+	}
+	
+
+}
