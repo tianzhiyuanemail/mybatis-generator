@@ -1,4 +1,4 @@
-package com.b2c.utils;
+package com.mybaits.utils;
 
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;

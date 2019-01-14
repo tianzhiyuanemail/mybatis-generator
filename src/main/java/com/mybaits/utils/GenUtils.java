@@ -1,7 +1,8 @@
-package com.b2c.utils;
+package com.mybaits.utils;
 
-import com.b2c.entity.ColumnEntity;
-import com.b2c.entity.TableEntity;
+import com.mybaits.config.Config;
+import com.mybaits.entity.ColumnEntity;
+import com.mybaits.entity.TableEntity;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -11,7 +12,10 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -26,7 +30,21 @@ import java.util.zip.ZipOutputStream;
  * @email sunlightcs@gmail.com
  * @date 2016年12月19日 下午11:40:24
  */
+@Component
 public class GenUtils {
+
+    @Resource
+    private Config config;
+
+    private static GenUtils genUtils;
+
+    @PostConstruct
+    public void init(){
+        genUtils = this;
+        genUtils.config = this.config;
+    }
+
+
 
     public static List<String> getTemplates(){
         List<String> templates = new ArrayList<String>();
@@ -47,15 +65,15 @@ public class GenUtils {
      */
     public static void generatorCode(Map<String, String> table,
                                      List<Map<String, String>> columns, ZipOutputStream zip) {
+
         //配置信息
-        Configuration config = getConfig();
         boolean hasBigDecimal = false;
         //表信息
         TableEntity tableEntity = new TableEntity();
         tableEntity.setTableName(table.get("tableName" ));
         tableEntity.setComments(table.get("tableComment" ));
         //表名转换成Java类名
-        String className = tableToJava(tableEntity.getTableName(), config.getString("tablePrefix" ));
+        String className = tableToJava(tableEntity.getTableName(), genUtils.config.getTablePrefix( ));
         tableEntity.setClassName(className);
         tableEntity.setClassname(StringUtils.uncapitalize(className));
 
@@ -72,9 +90,8 @@ public class GenUtils {
             String attrName = columnToJava(columnEntity.getColumnName());
             columnEntity.setAttrName(attrName);
             columnEntity.setAttrname(StringUtils.uncapitalize(attrName));
-
             //列的数据类型，转换成Java类型
-            String attrType = config.getString(columnEntity.getDataType(), "unknowType" );
+            String attrType =  genUtils.config.getColumnToJava().get(columnEntity.getDataType());
             columnEntity.setAttrType(attrType);
             if (!hasBigDecimal && attrType.equals("BigDecimal" )) {
                 hasBigDecimal = true;
@@ -97,8 +114,6 @@ public class GenUtils {
         Properties prop = new Properties();
         prop.put("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader" );
         Velocity.init(prop);
-        String mainPath = config.getString("mainPath" );
-        mainPath = StringUtils.isBlank(mainPath) ? "io.renren" : mainPath;
         //封装模板数据
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("tableName", tableEntity.getTableName());
@@ -109,12 +124,12 @@ public class GenUtils {
         map.put("pathName", tableEntity.getClassname().toLowerCase());
         map.put("columns", tableEntity.getColumns());
         map.put("hasBigDecimal", hasBigDecimal);
-        map.put("mainPath", mainPath);
-        map.put("package", config.getString("package" ));
-        map.put("moduleName", config.getString("moduleName" ));
-        map.put("author", config.getString("author" ));
-        map.put("email", config.getString("email" ));
-        map.put("datetime", DateUtils.format(new Date(), DateUtils.DATE_TIME_PATTERN));
+        map.put("mainPath", genUtils.config.getMainPath());
+        map.put("package", genUtils.config.getPackages());
+        map.put("moduleName", genUtils.config.getModuleName());
+        map.put("author", genUtils.config.getAuthor());
+        map.put("email", genUtils.config.getEmail());
+        map.put("datetime",  DateUtils.format(new Date(), DateUtils.DATE_TIME_PATTERN));
         VelocityContext context = new VelocityContext(map);
 
         //获取模板列表
@@ -127,7 +142,7 @@ public class GenUtils {
 
             try {
                 //添加到zip
-                zip.putNextEntry(new ZipEntry(getFileName(template, tableEntity.getClassName(), config.getString("package" ), config.getString("moduleName" ))));
+                zip.putNextEntry(new ZipEntry(getFileName(template, tableEntity.getClassName(), genUtils.config.getPackages(), genUtils.config.getModuleName())));
                 IOUtils.write(sw.toString(), zip, "UTF-8" );
                 IOUtils.closeQuietly(sw);
                 zip.closeEntry();
@@ -155,16 +170,7 @@ public class GenUtils {
         return columnToJava(tableName);
     }
 
-    /**
-     * 获取配置信息
-     */
-    public static Configuration getConfig() {
-        try {
-            return new PropertiesConfiguration("generator.properties" );
-        } catch (ConfigurationException e) {
-            throw new RRException("获取配置文件失败，", e);
-        }
-    }
+
 
     /**
      * 获取文件名

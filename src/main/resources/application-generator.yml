@@ -1,0 +1,38 @@
+config:
+    #zip包名称
+    zipName: haier.zip
+    #基础域名（可不写）
+    mainPath:
+    #包名称
+    packages: com.haier.w
+    #模块名称
+    moduleName: esewsw
+    #用户
+    author: 志远
+    #邮箱
+    email: email@163.com
+    #去除表头
+    tablePrefix: tb_
+
+    columnToJava:
+      tinyint: Integer
+      smallint: Integer
+      mediumint: Integer
+      int: Integer
+      integer: Integer
+      bigint: Long
+      float: Float
+      double: Double
+      decimal: BigDecimal
+      bit: Boolean
+      
+      char: String
+      varchar: String
+      tinytext: String
+      text: String
+      mediumtext: String
+      longtext: String
+      
+      date: Date
+      datetime: Date
+      timestamp: Date

@@ -1,10 +1,10 @@
-package com.b2c.controller;
+package com.mybaits.controller;
 
-import com.b2c.PackConfig;
-import com.b2c.service.SysGeneratorService;
-import com.b2c.utils.PageUtils;
-import com.b2c.utils.Query;
-import com.b2c.utils.R;
+import com.mybaits.config.Config;
+import com.mybaits.service.SysGeneratorService;
+import com.mybaits.utils.PageUtils;
+import com.mybaits.utils.Query;
+import com.mybaits.utils.R;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +22,6 @@ import java.util.Map;
 
 /**
  * 代码生成器
- * 
- * @author chenshun
- * @email sunlightcs@gmail.com
- * @date 2016年12月19日 下午9:12:58
  */
 @Controller
 @RequestMapping("/sys/generator")
@@ -34,7 +30,22 @@ public class SysGeneratorController {
 	private SysGeneratorService sysGeneratorService;
 
 	@Resource
-	private PackConfig packConfig;
+	private Config config;
+
+	@RequestMapping("/test")
+	public String test(){
+
+		System.out.println(config.getZipName());
+		return "index";
+	}
+
+
+
+	@RequestMapping("/")
+	public String index(){
+		return "index";
+	}
+
 	/**
 	 * 列表
 	 */
@@ -64,7 +75,7 @@ public class SysGeneratorController {
 
 
 		response.reset();  
-        response.setHeader("Content-Disposition", "attachment; filename=\"b2c.zip\"");
+        response.setHeader("Content-Disposition", "attachment; filename="+config.getZipName());
         response.addHeader("Content-Length", "" + data.length);  
         response.setContentType("application/octet-stream; charset=UTF-8");  
   

@@ -1,7 +1,7 @@
-package com.b2c.service;
+package com.mybaits.service;
 
-import com.b2c.dao.SysGeneratorDao;
-import com.b2c.utils.GenUtils;
+import com.mybaits.dao.SysGeneratorDao;
+import com.mybaits.utils.GenUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,10 +13,6 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * 代码生成器
- * 
- * @author chenshun
- * @email sunlightcs@gmail.com
- * @date 2016年12月19日 下午3:33:38
  */
 @Service
 public class SysGeneratorService {

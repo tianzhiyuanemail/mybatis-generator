@@ -10,7 +10,6 @@ spring:
     datasource:
         type: com.alibaba.druid.pool.DruidDataSource
         driverClassName: com.mysql.jdbc.Driver
-
         url: jdbc:mysql://mysql01.ehaierali.com:3306/db_marketing?useUnicode=true&characterEncoding=UTF-8
         username: pdc_rd
         password: cfds0920
@@ -19,13 +18,12 @@ spring:
         date-format: yyyy-MM-dd HH:mm:ss
     resources:
             static-locations: classpath:/static/,classpath:/views/
+    profiles:
+      include: generator
 
 # Mybatis配置
 mybatis:
     mapperLocations: classpath:mapper/**/*.xml
 
-pack:
-  zipName: haier.zip
-  package: com.haier
 
 

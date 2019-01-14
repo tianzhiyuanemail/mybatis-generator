@@ -1,4 +1,4 @@
-package com.b2c.utils;
+package com.mybaits.utils;
 
 /**
  * 自定义异常
