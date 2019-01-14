@@ -12,8 +12,9 @@ config:
     #邮箱
     email: email@163.com
     #去除表头
-    tablePrefix: tb_
+    tablePrefix: wx_
 
+    #数据库 java 类型转换
     columnToJava:
       tinyint: Integer
       smallint: Integer
