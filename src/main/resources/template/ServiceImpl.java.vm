@@ -1,11 +1,11 @@
-package ${package}.service.${moduleName}.impl;
+package ${package}.service#if($moduleName != "").${moduleName}#end.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.haier.common.PagerInfo;
 import com.haier.common.ServiceResult;
-import ${package}.dao.${moduleName}.${className}Dao;
-import ${package}.entity.${moduleName}.${className}Entity;
-import ${package}.service.${moduleName}.${className}Service;
+import ${package}.dao#if($moduleName != "").${moduleName}#end.${className}Dao;
+import ${package}.entity#if($moduleName != "").${moduleName}#end.${className}Entity;
+import ${package}.service#if($moduleName != "").${moduleName}#end.${className}Service;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

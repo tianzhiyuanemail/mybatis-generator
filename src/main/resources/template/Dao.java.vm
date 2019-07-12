@@ -1,6 +1,6 @@
-package ${package}.dao.${moduleName};
+package ${package}.dao#if($moduleName != "").${moduleName}#end;
 
-import ${package}.entity.${moduleName}.${className}Entity;
+import ${package}.entity#if($moduleName != "").${moduleName}#end.${className}Entity;
 
 import java.util.List;
 import java.util.Map;

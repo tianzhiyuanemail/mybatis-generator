@@ -1,4 +1,4 @@
-package ${package}.controller.${moduleName};
+package ${package}.controller#if($moduleName != "").${moduleName}#end;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.haier.cbs.system.entity.SysUser;
@@ -8,8 +8,8 @@ import com.haier.common.ServiceResult;
 import com.haier.uadmin.system.service.SystemService;
 import com.haier.wx.common.DataGrid;
 import com.haier.wx.common.HttpJsonResult;
-import ${package}.entity.${moduleName}.${className}Entity;
-import ${package}.service.${moduleName}.${className}Service;
+import ${package}.entity#if($moduleName != "").${moduleName}#end.${className}Entity;
+import ${package}.service#if($moduleName != "").${moduleName}#end.${className}Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;

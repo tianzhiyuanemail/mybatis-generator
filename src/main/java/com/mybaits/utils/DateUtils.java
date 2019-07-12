@@ -1,5 +1,7 @@
 package com.mybaits.utils;
 
+import org.apache.commons.lang.math.NumberUtils;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -26,5 +28,9 @@ public class DateUtils {
             return df.format(date);
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(NumberUtils.isNumber("9999 "));
     }
 }

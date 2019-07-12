@@ -1,18 +1,18 @@
 config:
     #zip包名称
-    zipName: haier.zip
+    zipName: tbk.zip
     #基础域名（可不写）
     mainPath:
     #包名称
-    packages: com.haier.w
+    packages: com.tbk
     #模块名称
-    moduleName: esewsw
+    moduleName:
     #用户
-    author: 志远
+    author: zhiyuan
     #邮箱
-    email: email@163.com
+    email: tianzhiyuanemail@163.com
     #去除表头
-    tablePrefix: wx_
+    tablePrefix: tbk_
 
     #数据库 java 类型转换
     columnToJava:
