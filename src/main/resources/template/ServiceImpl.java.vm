@@ -1,8 +1,8 @@
 package ${package}.service#if($moduleName != "").${moduleName}#end.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.haier.common.PagerInfo;
-import com.haier.common.ServiceResult;
+import com.tbk.common.PagerInfo;
+import com.tbk.common.ServiceResult;
 import ${package}.dao#if($moduleName != "").${moduleName}#end.${className}Dao;
 import ${package}.entity#if($moduleName != "").${moduleName}#end.${className}Entity;
 import ${package}.service#if($moduleName != "").${moduleName}#end.${className}Service;

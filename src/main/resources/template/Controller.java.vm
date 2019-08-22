@@ -62,7 +62,7 @@ public class ${className}Controller {
         DataGrid<${className}Entity> result = new DataGrid<>();
 
         try {
-            PagerInfo pagerInfo = new PagerInfo(rows, page);
+            PagerInfo pagerInfo = new PagerInfo(page , rows);
             Map<String, Object> map = new HashMap<>();
             if (key!=null&& !"".equals(key)){
                 map.put("key",key);

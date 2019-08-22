@@ -178,27 +178,27 @@ public class GenUtils {
     public static String getFileName(String template, String className, String packageName, String moduleName) {
         String packagePath = "main" + File.separator + "java" + File.separator;
         if (StringUtils.isNotBlank(packageName)) {
-            packagePath += packageName.replace(".", File.separator) + File.separator + moduleName + File.separator;
+            packagePath += packageName.replace(".", File.separator) + File.separator  + File.separator;
         }
 
         if (template.contains("Entity.java.vm" )) {
-            return packagePath + "entity" + File.separator + className + "Entity.java";
+            return packagePath + "entity"  +  File.separator +  moduleName +  File.separator + className + "Entity.java";
         }
 
         if (template.contains("Dao.java.vm" )) {
-            return packagePath + "dao" + File.separator + className + "Dao.java";
+            return packagePath + "dao"  +  File.separator +  moduleName +  File.separator + className + "Dao.java";
         }
 
         if (template.contains("Service.java.vm" )) {
-            return packagePath + "service" + File.separator + className + "Service.java";
+            return packagePath + "service"  +  File.separator +  moduleName +  File.separator + className + "Service.java";
         }
 
         if (template.contains("ServiceImpl.java.vm" )) {
-            return packagePath + "service" + File.separator + "impl" + File.separator + className + "ServiceImpl.java";
+            return packagePath + "service"  +  File.separator + moduleName +  File.separator + "impl" + File.separator + className + "ServiceImpl.java";
         }
 
         if (template.contains("Controller.java.vm" )) {
-            return packagePath + "controller" + File.separator + className + "Controller.java";
+            return packagePath + "controller"  +  File.separator +  moduleName +  File.separator + className + "Controller.java";
         }
 
         if (template.contains("Dao.xml.vm" )) {

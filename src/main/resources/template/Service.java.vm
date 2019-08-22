@@ -2,8 +2,8 @@ package ${package}.service#if($moduleName != "").${moduleName}#end;
 
 import ${package}.entity#if($moduleName != "").${moduleName}#end.${className}Entity;
 
-import com.haier.common.PagerInfo;
-import com.haier.common.ServiceResult;
+import com.tbk.common.PagerInfo;
+import com.tbk.common.ServiceResult;
 import java.util.List;
 import java.util.Map;
 
