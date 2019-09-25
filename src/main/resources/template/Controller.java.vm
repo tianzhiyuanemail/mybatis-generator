@@ -67,7 +67,7 @@ public class ${className}Controller {
 
             ServiceResult<List<${className}Entity>> serviceResult = ${classname}Service.queryList(pagerInfo, map);
             if (serviceResult.getSuccess() && serviceResult.getSuccess()) {
-                result.setList(serviceResult.getResult());
+                result.setList(serviceResult.getResult(),serviceResult.getPager());
             } else {
                 result.setMessage("查询列表出现异常");
             }

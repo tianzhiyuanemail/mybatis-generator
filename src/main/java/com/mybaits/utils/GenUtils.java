@@ -3,6 +3,7 @@ package com.mybaits.utils;
 import com.mybaits.config.Config;
 import com.mybaits.entity.ColumnEntity;
 import com.mybaits.entity.TableEntity;
+
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -39,14 +41,12 @@ public class GenUtils {
     private static GenUtils genUtils;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         genUtils = this;
         genUtils.config = this.config;
     }
 
-
-
-    public static List<String> getTemplates(){
+    public static List<String> getTemplates() {
         List<String> templates = new ArrayList<String>();
         templates.add("template/Entity.java.vm");
         templates.add("template/Dao.java.vm");
@@ -70,34 +70,34 @@ public class GenUtils {
         boolean hasBigDecimal = false;
         //表信息
         TableEntity tableEntity = new TableEntity();
-        tableEntity.setTableName(table.get("tableName" ));
-        tableEntity.setComments(table.get("tableComment" ));
+        tableEntity.setTableName(table.get("tableName"));
+        tableEntity.setComments(table.get("tableComment"));
         //表名转换成Java类名
-        String className = tableToJava(tableEntity.getTableName(), genUtils.config.getTablePrefix( ));
+        String className = tableToJava(tableEntity.getTableName(), genUtils.config.getTablePrefix());
         tableEntity.setClassName(className);
         tableEntity.setClassname(StringUtils.uncapitalize(className));
 
         //列信息
         List<ColumnEntity> columsList = new ArrayList<ColumnEntity>();
-        for(Map<String, String> column : columns){
+        for (Map<String, String> column : columns) {
             ColumnEntity columnEntity = new ColumnEntity();
-            columnEntity.setColumnName(column.get("columnName" ));
-            columnEntity.setDataType(column.get("dataType" ));
-            columnEntity.setComments(column.get("columnComment" ));
-            columnEntity.setExtra(column.get("extra" ));
+            columnEntity.setColumnName(column.get("columnName"));
+            columnEntity.setDataType(column.get("dataType"));
+            columnEntity.setComments(column.get("columnComment"));
+            columnEntity.setExtra(column.get("extra"));
 
             //列名转换成Java属性名
             String attrName = columnToJava(columnEntity.getColumnName());
             columnEntity.setAttrName(attrName);
             columnEntity.setAttrname(StringUtils.uncapitalize(attrName));
             //列的数据类型，转换成Java类型
-            String attrType =  genUtils.config.getColumnToJava().get(columnEntity.getDataType());
+            String attrType = genUtils.config.getColumnToJava().get(columnEntity.getDataType());
             columnEntity.setAttrType(attrType);
-            if (!hasBigDecimal && attrType.equals("BigDecimal" )) {
+            if (!hasBigDecimal && attrType.equals("BigDecimal")) {
                 hasBigDecimal = true;
             }
             //是否主键
-            if ("PRI".equalsIgnoreCase(column.get("columnKey" )) && tableEntity.getPk() == null) {
+            if ("PRI".equalsIgnoreCase(column.get("columnKey")) && tableEntity.getPk() == null) {
                 tableEntity.setPk(columnEntity);
             }
 
@@ -112,7 +112,7 @@ public class GenUtils {
 
         //设置velocity资源加载器
         Properties prop = new Properties();
-        prop.put("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader" );
+        prop.put("file.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
         Velocity.init(prop);
         //封装模板数据
         Map<String, Object> map = new HashMap<String, Object>();
@@ -129,7 +129,7 @@ public class GenUtils {
         map.put("moduleName", genUtils.config.getModuleName());
         map.put("author", genUtils.config.getAuthor());
         map.put("email", genUtils.config.getEmail());
-        map.put("datetime",  DateUtils.format(new Date(), DateUtils.DATE_TIME_PATTERN));
+        map.put("datetime", DateUtils.format(new Date(), DateUtils.DATE_TIME_PATTERN));
         VelocityContext context = new VelocityContext(map);
 
         //获取模板列表
@@ -137,13 +137,19 @@ public class GenUtils {
         for (String template : templates) {
             //渲染模板
             StringWriter sw = new StringWriter();
-            Template tpl = Velocity.getTemplate(template, "UTF-8" );
+            Template tpl = Velocity.getTemplate(template, "UTF-8");
             tpl.merge(context, sw);
 
             try {
                 //添加到zip
-                zip.putNextEntry(new ZipEntry(getFileName(template, tableEntity.getClassName(), genUtils.config.getPackages(), genUtils.config.getModuleName())));
-                IOUtils.write(sw.toString(), zip, "UTF-8" );
+                zip.putNextEntry(new ZipEntry(
+                        getFileName(template,
+                                tableEntity.getClassName(),
+                                tableEntity.getClassname(),
+                                genUtils.config.getPackages(),
+                                genUtils.config.getModuleName()
+                        )));
+                IOUtils.write(sw.toString(), zip, "UTF-8");
                 IOUtils.closeQuietly(sw);
                 zip.closeEntry();
             } catch (IOException e) {
@@ -152,12 +158,11 @@ public class GenUtils {
         }
     }
 
-
     /**
      * 列名转换成Java属性名
      */
     public static String columnToJava(String columnName) {
-        return WordUtils.capitalizeFully(columnName, new char[]{'_'}).replace("_", "" );
+        return WordUtils.capitalizeFully(columnName, new char[] {'_'}).replace("_", "");
     }
 
     /**
@@ -165,58 +170,61 @@ public class GenUtils {
      */
     public static String tableToJava(String tableName, String tablePrefix) {
         if (StringUtils.isNotBlank(tablePrefix)) {
-            tableName = tableName.replace(tablePrefix, "" );
+            tableName = tableName.replace(tablePrefix, "");
         }
         return columnToJava(tableName);
     }
 
-
-
     /**
      * 获取文件名
      */
-    public static String getFileName(String template, String className, String packageName, String moduleName) {
+    public static String getFileName(String template,String className, String classname, String packageName,
+                                     String moduleName) {
         String packagePath = "main" + File.separator + "java" + File.separator;
         if (StringUtils.isNotBlank(packageName)) {
-            packagePath += packageName.replace(".", File.separator) + File.separator  + File.separator;
+            packagePath += packageName.replace(".", File.separator) + File.separator + File.separator;
         }
 
-        if (template.contains("Entity.java.vm" )) {
-            return packagePath + "entity"  +  File.separator +  moduleName +  File.separator + className + "Entity.java";
+        if (template.contains("Entity.java.vm")) {
+            return packagePath + "entity" + File.separator + moduleName + File.separator + className + "Entity.java" ;
         }
 
-        if (template.contains("Dao.java.vm" )) {
-            return packagePath + "dao"  +  File.separator +  moduleName +  File.separator + className + "Dao.java";
+        if (template.contains("Dao.java.vm")) {
+            return packagePath + "dao" + File.separator + moduleName + File.separator + className + "Dao.java" ;
         }
 
-        if (template.contains("Service.java.vm" )) {
-            return packagePath + "service"  +  File.separator +  moduleName +  File.separator + className + "Service.java";
+        if (template.contains("Service.java.vm")) {
+            return packagePath + "service" + File.separator + moduleName + File.separator + className + "Service.java" ;
         }
 
-        if (template.contains("ServiceImpl.java.vm" )) {
-            return packagePath + "service"  +  File.separator + moduleName +  File.separator + "impl" + File.separator + className + "ServiceImpl.java";
+        if (template.contains("ServiceImpl.java.vm")) {
+            return packagePath + "service" + File.separator + moduleName + File.separator + "impl" + File.separator
+                    + className + "ServiceImpl.java" ;
         }
 
-        if (template.contains("Controller.java.vm" )) {
-            return packagePath + "controller"  +  File.separator +  moduleName +  File.separator + className + "Controller.java";
+        if (template.contains("Controller.java.vm")) {
+            return packagePath + "controller" + File.separator + moduleName + File.separator + className
+                    + "Controller.java" ;
         }
 
-        if (template.contains("Dao.xml.vm" )) {
-            return "main" + File.separator + "resources" + File.separator + "mapper" + File.separator + moduleName + File.separator + className + "Dao.xml";
+        if (template.contains("Dao.xml.vm")) {
+            return "main" + File.separator + "resources" + File.separator + "mapper" + File.separator + moduleName
+                    + File.separator + className + "Dao.xml" ;
         }
 
-        if (template.contains("list.html.vm" )) {
+        if (template.contains("list.html.vm")) {
             return "main" + File.separator + "resources" + File.separator + "views" + File.separator
-                    + "modules" + File.separator + moduleName + File.separator + className.toLowerCase() + ".html";
+                    + "modules" + File.separator + moduleName + File.separator + classname + ".html" ;
         }
 
-        if (template.contains("list.js.vm" )) {
-            return "main" + File.separator + "resources" + File.separator + "static" + File.separator + "js" + File.separator
-                    + "modules" + File.separator + moduleName + File.separator + className.toLowerCase() + ".js";
+        if (template.contains("list.js.vm")) {
+            return "main" + File.separator + "resources" + File.separator + "static" + File.separator + "js"
+                    + File.separator
+                    + "modules" + File.separator + moduleName + File.separator + classname + ".js" ;
         }
 
-        if (template.contains("menu.sql.vm" )) {
-            return className.toLowerCase() + "_menu.sql";
+        if (template.contains("menu.sql.vm")) {
+            return className.toLowerCase() + "_menu.sql" ;
         }
 
         return null;

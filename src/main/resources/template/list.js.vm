@@ -90,13 +90,17 @@ var vm = new Vue({
                 url: "/${moduleName}/${classname}/info.json?id=" + id[0].id,
                 async: true,
                 successCallback: function (r) {
-                    vm.${classname} = r.${classname};
+                    vm.${classname} = r.data;
                 }
             });
         },
         reload: function (event) {
             vm.showList = true;
-            TreeGrid.table.refresh();
+            $("#jqGrid").jqGrid('setGridParam', {
+                postData: {'name': vm.q.name},
+                page: 1
+            }).trigger("reloadGrid");
+            vm.handleReset('formValidate');
         },
 
         handleSubmit: function (name) {
