@@ -1,29 +1,29 @@
 package ${package}.controller#if($moduleName != "").${moduleName}#end;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.haier.cbs.system.entity.SysUser;
-import com.haier.cbs.web.util.WebUtil;
-import com.haier.common.PagerInfo;
-import com.haier.common.ServiceResult;
-import com.haier.uadmin.system.service.SystemService;
-import com.haier.wx.common.DataGrid;
-import com.haier.wx.common.HttpJsonResult;
-import ${package}.entity#if($moduleName != "").${moduleName}#end.${className}Entity;
-import ${package}.service#if($moduleName != "").${moduleName}#end.${className}Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
+import com.tbk.common.DataGrid;
+import com.tbk.common.HttpJsonResult;
+import com.tbk.common.PagerInfo;
+import com.tbk.common.ServiceResult;
+
+import ${package}.entity#if($moduleName != "").${moduleName}#end.${className}Entity;
+import ${package}.service#if($moduleName != "").${moduleName}#end.${className}Service;
 
 /**
  * ${comments}
@@ -41,13 +41,10 @@ public class ${className}Controller {
     @Resource
     private ${className}Service ${classname}Service;
 
-    @Reference(timeout = 3000, lazy = true)
-    private SystemService uadminSystemService;
 
     @RequestMapping(value = "/index.html")
-    public String index(ModelMap modelMap){
-
-        return "${moduleName}/${classname}";
+    public String index(ModelMap modelMap) {
+        return "page/${moduleName}/${classname}" ;
     }
 
     /**
@@ -55,112 +52,115 @@ public class ${className}Controller {
      */
     @RequestMapping(value = "/getList.json")
     @ResponseBody
-    public DataGrid<${className}Entity> getList( @RequestParam(defaultValue = "1", required = false) Integer page,
-                                                 @RequestParam(defaultValue = "10", required = false) Integer rows,
-                                                 String  key){
+    public DataGrid<${className}Entity> getList(@RequestParam(defaultValue = "1", required = false) Integer page,
+                                                @RequestParam(defaultValue = "10", required = false) Integer rows,
+                                                String key) {
 
         DataGrid<${className}Entity> result = new DataGrid<>();
 
         try {
-            PagerInfo pagerInfo = new PagerInfo(page , rows);
+            PagerInfo pagerInfo = new PagerInfo(page, rows);
             Map<String, Object> map = new HashMap<>();
-            if (key!=null&& !"".equals(key)){
-                map.put("key",key);
+            if (key != null && !"".equals(key)) {
+                map.put("key", key);
             }
 
             ServiceResult<List<${className}Entity>> serviceResult = ${classname}Service.queryList(pagerInfo, map);
             if (serviceResult.getSuccess() && serviceResult.getSuccess()) {
-                result.setResult(true);
-                result.setRows(serviceResult.getResult());
-                result.setTotal(serviceResult.getPager().getRowsCount());
-            }else {
-                result.setResult(false);
+                result.setList(serviceResult.getResult());
+            } else {
                 result.setMessage("查询列表出现异常");
             }
         } catch (Exception e) {
-            logger.error("module:${className}Controller, action:/${moduleName}/${classname}/getList.json,查询异常" +e);
-            result.setResult(false);
+            logger.error("module:${className}Controller, action:/${moduleName}/${classname}/getList.json,查询异常" + e);
+            result.setMessage("查询列表出现异常");
         }
         return result;
     }
 
-
-    @RequestMapping(value="/save.json")
+    @RequestMapping(value = "/info.json")
     @ResponseBody
-    public HttpJsonResult save(HttpServletRequest request,${className}Entity ${classname}) {
-        HttpJsonResult<Boolean> result = new HttpJsonResult<>();
+    public HttpJsonResult<${className}Entity> info(HttpServletRequest request, Integer id) {
+        HttpJsonResult<${className}Entity> result = new HttpJsonResult<>();
         try {
 
-            SysUser sysUser = uadminSystemService.getUserBySessionId(WebUtil.sessionId(request)).getResult();
-            String username = null == sysUser ? "未登录用户" : sysUser.getUserName();
+            ServiceResult<${className}Entity> serviceResult =  ${classname}Service.queryObject(id);
+            if (serviceResult.getSuccess() && serviceResult.getResult() != null) {
+                result.setData(serviceResult.getResult());
+            } else {
+                result.setMessage(serviceResult.getMessage());
+            }
+        } catch (Exception e) {
+            result.setMessage("查询未知异常");
+            logger.error("module:CateController, action:/tbk/cate/info.json,查询异常" + e);
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/save.json")
+    @ResponseBody
+    public HttpJsonResult save(HttpServletRequest request,@RequestBody ${className}Entity ${classname}) {
+        HttpJsonResult<Boolean> result = new HttpJsonResult<>();
+        try {
 
             ServiceResult<Integer> serviceResult = ${classname}Service.save(${classname});
-            if(serviceResult.getSuccess()&&serviceResult.getResult()==1){
+            if (serviceResult.getSuccess() && serviceResult.getResult() == 1) {
                 result.setData(true);
-            }else{
+            } else {
                 result.setData(false);
                 result.setMessage(serviceResult.getMessage());
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             result.setData(false);
-            result.setMessage("未知异常");
-            logger.error("module:${className}Controller, action:/${moduleName}/${classname}/save.json,保存异常" +e);
+            result.setMessage("保存未知异常");
+            logger.error("module:${className}Controller, action:/${moduleName}/${classname}/save.json,保存异常" + e);
         }
         return result;
     }
 
-    @RequestMapping(value="/update.json")
+    @RequestMapping(value = "/update.json")
     @ResponseBody
-    public HttpJsonResult update(HttpServletRequest request,${className}Entity ${classname}) {
+    public HttpJsonResult update(HttpServletRequest request,@RequestBody ${className}Entity ${classname}) {
         HttpJsonResult<Boolean> result = new HttpJsonResult<>();
         try {
-
-            SysUser sysUser = uadminSystemService.getUserBySessionId(WebUtil.sessionId(request)).getResult();
-            String username = null == sysUser ? "未登录用户" : sysUser.getUserName();
 
             ServiceResult<Integer> serviceResult = ${classname}Service.update(${classname});
-            if(serviceResult.getSuccess()&&serviceResult.getResult()==1){
+            if (serviceResult.getSuccess() && serviceResult.getResult() == 1) {
                 result.setData(true);
-            }else{
+            } else {
                 result.setData(false);
                 result.setMessage(serviceResult.getMessage());
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             result.setData(false);
-            result.setMessage("未知异常");
-            logger.error("module:${className}Controller, action:/${moduleName}/${classname}/update.json,修改异常" +e);
+            result.setMessage("修改未知异常");
+            logger.error("module:${className}Controller, action:/${moduleName}/${classname}/update.json,修改异常" + e);
         }
         return result;
     }
 
-
-    @RequestMapping(value="/remove.json")
+    @RequestMapping(value = "/remove.json")
     @ResponseBody
-    public HttpJsonResult remove(HttpServletRequest request,Integer id) {
+    public HttpJsonResult remove(HttpServletRequest request, Integer id) {
         HttpJsonResult<Boolean> result = new HttpJsonResult<>();
         try {
-            ${className}Entity ${classname} = new ${className}Entity();
+                ${className}Entity ${classname} = new ${className}Entity();
             ${classname}.setId(id);
 
-            SysUser sysUser = uadminSystemService.getUserBySessionId(WebUtil.sessionId(request)).getResult();
-            String username = null == sysUser ? "未登录用户" : sysUser.getUserName();
-
+            // todo 删除方法需根据实际情况更改
             ServiceResult<Integer> serviceResult = ${classname}Service.update(${classname});
-            if(serviceResult.getSuccess()&&serviceResult.getResult()==1){
+            if (serviceResult.getSuccess() && serviceResult.getResult() == 1) {
                 result.setData(true);
-            }else{
+            } else {
                 result.setData(false);
                 result.setMessage(serviceResult.getMessage());
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             result.setData(false);
-            result.setMessage("未知异常");
-            logger.error("module:${className}Controller, action:/${moduleName}/${classname}/remove.json,删除异常" +e);
+            result.setMessage("删除未知异常");
+            logger.error("module:${className}Controller, action:/${moduleName}/${classname}/remove.json,删除异常" + e);
         }
         return result;
     }
-
-
-
 
 }

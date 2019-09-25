@@ -6,7 +6,7 @@ config:
     #包名称
     packages: com.tbk
     #模块名称
-    moduleName: product
+    moduleName: manage
     #用户
     author: zhiyuan
     #邮箱

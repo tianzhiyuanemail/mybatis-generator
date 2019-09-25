@@ -1,355 +1,115 @@
+
 $(function () {
-    $("#jqGrid").jqGrid({
-        url: baseURL + '${moduleName}/${pathName}/list',
-        datatype: "json",
+    $("#jqGrid").Grid({
+        url: '/${moduleName}/${classname}/getList.json',
         colModel: [
 #foreach($column in $columns)
-#if($column.columnName == $pk.columnName)
-			{ label: '${column.attrname}', name: '${column.attrname}', index: '${column.columnName}', width: 50, key: true },
-#else
-			{ label: '${column.comments}', name: '${column.attrname}', index: '${column.columnName}', width: 80 }#if($velocityCount != $columns.size()), #end
-
+    #if($column.columnName == $pk.columnName)
+            { label: '${column.attrname}', name: '${column.attrname}', index: '${column.columnName}', width: 50, key: true },
+    #else
+            { label: '${column.comments}', name: '${column.attrname}', index: '${column.columnName}', width: 80 }#if($velocityCount != $columns.size()), #end
+    #end
 #end
-#end
-        ],
-		viewrecords: true,
-        height: 385,
-        rowNum: 10,
-		rowList : [10,30,50],
-        rownumbers: true,
-        rownumWidth: 25,
-        autowidth:true,
-        multiselect: true,
-        pager: "#jqGridPager",
-        jsonReader : {
-            root: "page.list",
-            page: "page.currPage",
-            total: "page.totalPage",
-            records: "page.totalCount"
-        },
-        prmNames : {
-            page:"page",
-            rows:"limit",
-            order: "order"
-        },
-        gridComplete:function(){
-        	//隐藏grid底部滚动条
-        	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
-        }
+        ]
     });
 });
 
 var vm = new Vue({
-	el:'#rrapp',
-	data:{
-		showList: true,
-		title: null,
-		${classname}: {}
-	},
-	methods: {
-		query: function () {
-			vm.reload();
-		},
-		add: function(){
-			vm.showList = false;
-			vm.title = "新增";
-			vm.${classname} = {};
-		},
-		update: function (event) {
-			var $pk.attrname = getSelectedRow();
-			if($pk.attrname == null){
-				return ;
-			}
-			vm.showList = false;
+    el: '#rrapp',
+    data: {
+        showList: true,
+        title: null,
+        ${classname}: {},
+        ruleValidate: {
+             name: [
+                 {required: true, message: '名称不能为空', trigger: 'blur'}
+             ],
+         },
+        q: {
+            name: ''
+        },
+        ${classname}s: []
+    },
+    methods: {
+        query: function () {
+            vm.reload();
+        },
+        add: function () {
+            vm.showList = false;
+            vm.title = "新增";
+            vm.${classname} = {};
+            vm.${classname}s = [];
+         },
+        update: function (event) {
+            var id = getSelectedRow("#jqGrid");
+            if (id == null) {
+                return;
+            }
+            vm.showList = false;
             vm.title = "修改";
 
-            vm.getInfo(${pk.attrname})
-		},
-		saveOrUpdate: function (event) {
-			var url = vm.${classname}.${pk.attrname} == null ? "${moduleName}/${pathName}/save" : "${moduleName}/${pathName}/update";
-			$.ajax({
-				type: "POST",
-			    url: baseURL + url,
+            vm.getInfo(id);
+         },
+        saveOrUpdate: function (event) {
+            var url = vm.${classname}.id == null ? "/${moduleName}/${classname}/save.json" :
+                "/${moduleName}/${classname}/update.json";
+
+            Ajax.request({
+                type: "POST",
+                url: url,
                 contentType: "application/json",
-			    data: JSON.stringify(vm.${classname}),
-			    success: function(r){
-			    	if(r.code === 0){
-						alert('操作成功', function(index){
-							vm.reload();
-						});
-					}else{
-						alert(r.msg);
-					}
-				}
-			});
-		},
-		del: function (event) {
-			var ${pk.attrname}s = getSelectedRows();
-			if(${pk.attrname}s == null){
-				return ;
-			}
-
-			confirm('确定要删除选中的记录？', function(){
-				$.ajax({
-					type: "POST",
-				    url: baseURL + "${moduleName}/${pathName}/delete",
-                    contentType: "application/json",
-				    data: JSON.stringify(${pk.attrname}s),
-				    success: function(r){
-						if(r.code == 0){
-							alert('操作成功', function(index){
-								$("#jqGrid").trigger("reloadGrid");
-							});
-						}else{
-							alert(r.msg);
-						}
-					}
-				});
-			});
-		},
-		getInfo: function(${pk.attrname}){
-			$.get(baseURL + "${moduleName}/${pathName}/info/"+${pk.attrname}, function(r){
-                vm.${classname} = r.${classname};
-            });
-		},
-		reload: function (event) {
-			vm.showList = true;
-			var page = $("#jqGrid").jqGrid('getGridParam','page');
-			$("#jqGrid").jqGrid('setGridParam',{
-                page:page
-            }).trigger("reloadGrid");
-		}
-	}
-});
-
-
-
-
-
-
-
-
-
-
-
-var dataGrId    = "#sgGroupBuyActivitiesDatagrid";  //datagrid 数据表格id
-var toolbarId   = "#sgGroupBuyActivitiesToolbar";   //toolbarId
-var editBtnId   = "#edit-btn";                      //编辑按钮id
-var searchForm  = "#searchForm";                    //search form id
-var addBtnId   = "#add-btn";                        //添加按钮id
-var removeBtnId = "#remove-btn";                    //删除按钮id
-var addOrEditId = "#add_or_edit_id";                //编辑或添加弹出框id
-var addOrEditFormId = "#add_or_edit_form_id";       //编辑或添加弹出框表单id
-var baseUrl = "/${moduleName}/${classname}/";             //
-var url = "";                                       //添加或修改url 默认为空不必设置
-
-var submitBtnId   = "#submit-btn";
-var exportBtnId   = "#export-btn";
-
-
-$(function () {
-    //验证过滤
-    validator = $(addOrEditFormId).validate({
-        onsubmit:false,
-        rules: {
-            name: {
-                required: true,
-                maxlength:100
-            }
-        },
-        messages: {
-            name: {
-                required: "这里是必填项",
-                maxlength: "这里是最大长度"
-            }
-        }
-    });
-    //数据表格
-    $(dataGrId).datagrid({
-        toolbar:toolbarId,
-        //fitColumns:"true",
-        pagination:"true",
-        pagePosition:"bottom",
-        rownumbers:true,
-        singleSelect:true,
-        striped:true,
-        fit:true,
-        method:"GET",
-        url:baseUrl+"getList.json",
-        onLoadSuccess:function(data){
-            // if (data.rows.length == 0){
-            //     $.messager.alert("提示","没有符合条件的内容！");
-            // }
-        },
-        columns:[[
-#foreach($column in $columns)
-            {field:"${column.attrname}",title:"${column.comments}",width:100,halign:'center',align:'center'},
-#end
-            //{field:"替换类字段",title:"替换名称",width:80,halign:'center',align:'center',formatter:function(value){
-            //     return "<img src="+value+" style='width: 50px;height: 50px;' />";
-            // }}
-        ]]
-    });
-
-    //添加绑定
-    $(addBtnId).click(function(){
-        dialogAdd();
-    });
-    //删除绑定
-    $(removeBtnId).click(function(){
-        remove();
-    });
-    //编辑绑定
-    $(editBtnId).click(function(){
-        dialogEdit();
-    });
-
-})
-
-
-/* 弹出增加窗口 */
-function dialogAdd(){
-    $(addOrEditId).dialog('open').dialog('setTitle','添加');
-    $(addOrEditFormId).form('clear');
-    $("label.error").remove();
-    $(".error").removeClass("error");
-
-    url=baseUrl+"save.json";
-
-    var row = $(dataGrId).datagrid('getSelected');
-
-    //初始化图片
-    //initUploadFile(row,0)
-}
-
-/*删除*/
-function remove(){
-    var row = $(dataGrId).datagrid('getSelected');
-    if (row){
-        jQuery.messager.confirm('提示','确认删除？',function(r){
-            if (r){
-                jQuery.post(baseUrl+"remove.json",{id:row.id},function(result){
-                    if (result.success){
-                        jQuery(dataGrId).datagrid('load');    // reload the user data
-                        jQuery.messager.show({
-                            title: '成功',
-                            msg: '删除成功'
-                        });
-                    } else {
-                        jQuery.messager.show({    // show error message
-                            title: '错误',
-                            msg: result.message
-                        });
-                    }
-                },'json');
-            }
-        });
-    }else{
-        jQuery.messager.alert('提示', '请选择一行！');
-    }
-}
-
-/*保存*/
-function save(){
-    formSave()
-}
-/*编辑*/
-function dialogEdit(){
-
-    var row = $(dataGrId).datagrid('getSelected');
-    if (row){
-
-        $(addOrEditId).dialog('open').dialog('setTitle','编辑');
-        $(addOrEditFormId).form('clear');
-        $(addOrEditFormId).form('load',row);
-        $("label.error").remove();
-        $(".error").removeClass("error");
-
-        url= baseUrl+"update.json";
-
-        // initUploadFile(row,1)
-    }else {
-        jQuery.messager.alert('提示', '请选择一行！');
-    }
-
-}
-
-
-function initUploadFile(row,isAdd) {
-
-    $(".filePicker").each(function(){
-        var id=$(this).attr("id");
-        var img=$(this).attr("img");
-        var input=$(this).attr("input");
-        //制空图片信息
-        $("#"+img).attr("src",null);
-        $("#"+input).val("");
-        // 如果是修改则回填,isAdd(0添加，1修改)
-        if (isAdd == 1){
-            $("#"+img).attr("src",row.avatarUrl);
-            $("#"+input).val(row.avatarUrl);
-        }
-
-
-        var  uploader = new plupload.Uploader({
-            browse_button : id, //触发文件选择对话框的按钮，为那个元素id
-            url : '/wxadmin/uploadImage.json', //服务器端的上传页面地址
-            flash_swf_url : 'js/Moxie.swf', //swf文件，当需要使用swf方式进行上传时需要配置该参数
-            silverlight_xap_url : 'js/Moxie.xap', //silverlight文件，当需要使用silverlight方式进行上传时需要配置该参数,
-            file_data_name:"file",
-            filters: {
-                mime_types : [ //只允许上传图片和zip文件
-                    { title : "Image files", extensions : "jpg,jpeg,png" }
-                ],
-                max_file_size : '2000kb', //最大只能上传2000kb的文件
-                prevent_duplicates : true //不允许选取重复文件
-            }
-        });
-        uploader.init();
-        uploader.bind('FilesAdded',function(uploader,files){
-            uploader.start();
-        });
-
-
-        uploader.bind('FileUploaded',function(uploader,file,responseObject){
-            var json=eval("("+responseObject.response+")");
-
-
-            if(file.size > 200*1000){
-                $.messager.alert("提示",'图片大于200Kb,请重新选择图片！');
-                // img.attr('src',"")
-                // $("#hImg-imageUrl").attr("src","");
-                // return false;
-            }else{
-                var image;
-                image=new Image();
-                image.src=json.data;
-                image.onload=function(){
-                    if(image.width/image.height<0.8 || image.width/image.height>1.25){
-                        $.messager.alert("提示",'图片尺寸不符合要求，宽高比例必须介于0.8到1.25之间！');
-                        $("#"+img).attr("src","");
-                    }else{
-                        uploader.removeFile(file);
-                        if(json.success){
-                            // alert(json.data);
-                            $("#"+img).attr("src",json.data);
-                            $("#"+input).val(json.data);
-                        }else{
-                            $.messager.alert(messagerTitle,json.message);
-                        }
-                    }
+                params: JSON.stringify(vm.${classname}),
+                successCallback: function () {
+                    alert('操作成功', function (index) {
+                        vm.reload();
+                    });
                 }
+            });
+        },
+        del: function (event) {
+            var ids = getSelectedRows("#jqGrid");
+            if (ids == null) {
+                return;
             }
 
-        });
-    });
-    $(".moxie-shim").each(function(index,item){
-        item.remove();
-    })
-}
+            confirm('确定要删除选中的记录？', function () {
 
+                Ajax.request({
+                    type: "POST",
+                    url: "/${moduleName}/${classname}/remove.json?id=" + id[0].id,
+                    successCallback: function () {
+                        alert('操作成功', function (index) {
+                            vm.reload();
+                        });
+                    }
+                });
+            });
+        },
+        getInfo: function (id) {
+            Ajax.request({
+                url: "/${moduleName}/${classname}/info.json?id=" + id[0].id,
+                async: true,
+                successCallback: function (r) {
+                    vm.${classname} = r.${classname};
+                }
+            });
+        },
+        reload: function (event) {
+            vm.showList = true;
+            TreeGrid.table.refresh();
+        },
 
+        handleSubmit: function (name) {
+            handleSubmitValidate(this, name, function () {
+                vm.saveOrUpdate()
+            });
+        },
+        handleReset: function (name) {
+            handleResetForm(this, name);
+        },
 
+    }
+});
 
 
 
